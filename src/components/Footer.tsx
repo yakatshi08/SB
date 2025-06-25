@@ -1,5 +1,6 @@
 import React from 'react';
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram, Linkedin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -102,6 +103,15 @@ const Footer = () => {
                 CGV
               </a>
             </div>
+          </div>
+          <div className="mt-2 space-x-4 text-sm text-center md:text-right">
+            <Link to="/mentions-legales" className="hover:text-golden-orange transition-colors">
+              Mentions légales
+            </Link>
+            <span>|</span>
+            <Link to="/politique-confidentialite" className="hover:text-golden-orange transition-colors">
+              Politique de confidentialité
+            </Link>
           </div>
         </div>
       </div>
