@@ -1,75 +1,99 @@
 import React from 'react';
-import { ArrowRight, CheckCircle, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Phone, Sparkles, Clock } from 'lucide-react';
 
-const HeroSection = () => {
+export default function HeroSection() {
+  const { t } = useTranslation();
+
   return (
-    <section 
-      className="relative bg-cover bg-center bg-no-repeat pt-32 pb-20 min-h-screen flex items-center"
-      style={{
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.pexels.com/photos/4099468/pexels-photo-4099468.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1080&fit=crop')`
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="max-w-4xl">
-          {/* Contenu textuel - Aligné à gauche */}
-          <div className="text-left">
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="flex text-golden-orange">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} size={20} fill="currentColor" />
-                ))}
-              </div>
-              <span className="text-white font-medium">4.9/5 - Plus de 500 clients satisfaits</span>
-            </div>
-            
-            {/* Titre principal sur une seule ligne */}
-            <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold mb-8 leading-tight">
-              <span className="text-white">Services de </span>
-              <span className="text-golden-orange">Nettoyage </span>
-              <span className="text-white">Professionnel</span>
+    <section className="relative bg-gradient-to-br from-green-800 to-green-600 text-white py-20 overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+      <div className="absolute inset-0 bg-green-800 bg-opacity-50"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          {/* Content */}
+          <div className="text-center md:text-left">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              {t('hero.title')}
+              <span className="block text-green-300">{t('hero.subtitle')}</span>
             </h1>
             
-            {/* Sous-texte descriptif */}
-            <p className="text-xl text-gray-200 mb-10 leading-relaxed max-w-3xl">
-              Confiez-nous l'entretien de vos espaces. Équipe qualifiée, produits écologiques, 
-              satisfaction garantie. Réservez en ligne en quelques clics.
+            <p className="text-xl mb-8 text-green-100 leading-relaxed">
+              {t('hero.description')}
             </p>
-
-            {/* Points forts avec icônes */}
-            <div className="space-y-5 mb-10">
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="text-golden-orange flex-shrink-0" size={28} />
-                <span className="text-white font-medium text-lg">Équipe professionnelle certifiée</span>
+            
+            {/* Features */}
+            <div className="flex flex-wrap gap-6 mb-8 justify-center md:justify-start">
+              <div className="flex items-center">
+                <Clock className="w-5 h-5 mr-2 text-green-300" />
+                <span className="text-sm">{t('hero.fastService')}</span>
               </div>
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="text-golden-orange flex-shrink-0" size={28} />
-                <span className="text-white font-medium text-lg">Produits écologiques et sains</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="text-golden-orange flex-shrink-0" size={28} />
-                <span className="text-white font-medium text-lg">Devis gratuit sous 24h</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <CheckCircle className="text-golden-orange flex-shrink-0" size={28} />
-                <span className="text-white font-medium text-lg">Assurance responsabilité civile</span>
+              <div className="flex items-center">
+                <Sparkles className="w-5 h-5 mr-2 text-green-300" />
+                <span className="text-sm">{t('hero.professionalCleaning')}</span>
               </div>
             </div>
-
-            {/* Boutons d'action */}
-            <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6">
-              <button className="bg-golden-orange hover:bg-golden-orange-dark text-white px-10 py-4 rounded-lg font-semibold text-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center space-x-3 shadow-xl">
-                <span>Réserver maintenant</span>
-                <ArrowRight size={22} />
-              </button>
-              <button className="border-2 border-white text-white hover:bg-white hover:text-forest-green px-10 py-4 rounded-lg font-semibold text-lg transition-all duration-200 shadow-xl backdrop-blur-sm">
-                Devis gratuit
-              </button>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link
+                to="/reservation"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors inline-flex items-center justify-center"
+              >
+                <Phone className="w-5 h-5 mr-2" />
+                {t('hero.bookNow')}
+              </Link>
+              
+              <a
+                href="tel:+33123456789"
+                className="border-2 border-white hover:bg-white hover:text-green-800 px-8 py-4 rounded-lg font-semibold text-lg transition-colors inline-flex items-center justify-center"
+              >
+                {t('hero.emergencyCall')}
+              </a>
+            </div>
+            
+            {/* Trust Elements */}
+            <div className="mt-8 pt-8 border-t border-green-600">
+              <div className="flex flex-wrap items-center gap-6 justify-center md:justify-start text-sm text-green-200">
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                  {t('hero.certifiedProfessionals')}
+                </div>
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                  {t('hero.guarantee')}
+                </div>
+                <div className="flex items-center">
+                  <span className="w-2 h-2 bg-green-400 rounded-full mr-2"></span>
+                  {t('hero.freeQuote')}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Image */}
+          <div className="relative">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl">
+              <img
+                src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt={t('hero.imageAlt')}
+                className="w-full h-80 object-cover rounded-lg"
+              />
+              
+              {/* Floating Card */}
+              <div className="absolute -bottom-6 -left-6 bg-orange-500 text-white p-6 rounded-xl shadow-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold">100%</div>
+                  <div className="text-sm font-medium">Satisfaction</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default HeroSection;
+}

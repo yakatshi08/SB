@@ -1,193 +1,251 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Phone, Mail, MapPin, Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import NavLink from './NavLink';
+import CTAButton from './CTAButton';
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useTranslation();
+  const { user, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Fermer le menu utilisateur en cliquant ailleurs
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Fermer le menu mobile lors du redimensionnement
+  useEffect(() => {
+    function handleResize() {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    }
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <header className="w-full">
-      {/* Partie A - Bande verte avec coordonnées */}
-      <div className="bg-forest-green text-white py-2">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-between items-center text-sm">
-            <div className="flex flex-wrap gap-4 md:gap-6">
-              <a href="tel:+33123456789" className="flex items-center gap-2 hover:text-golden-orange transition-colors">
-                <Phone size={14} />
-                <span className="hidden sm:inline">+33 1 23 45 67 89</span>
-                <span className="sm:hidden">Appeler</span>
+    <>
+      {/* Barre verte unifiée avec tous les éléments */}
+      <div className="bg-green-700 text-white py-2 text-sm hidden lg:block">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-end items-center space-x-6">
+            {/* Île-de-France */}
+            <div className="flex items-center">
+              <MapPin className="w-4 h-4 mr-2" />
+              <span>Île-de-France</span>
+            </div>
+            
+            {/* Service 24h/24 */}
+            <div className="flex items-center">
+              <span className="text-green-200">Service disponible 24h/24</span>
+            </div>
+            
+            {/* Téléphone */}
+            <div className="flex items-center">
+              <Phone className="w-4 h-4 mr-2" />
+              <a href="tel:+33123456789" className="hover:text-green-200 transition-colors">
+                +33 1 23 45 67 89
               </a>
-              <a href="mailto:contact@sb-nettoyage.fr" className="flex items-center gap-2 hover:text-golden-orange transition-colors">
-                <Mail size={14} />
-                <span className="hidden md:inline">contact@sb-nettoyage.fr</span>
-                <span className="md:hidden">Email</span>
+            </div>
+            
+            {/* Email */}
+            <div className="flex items-center">
+              <Mail className="w-4 h-4 mr-2" />
+              <a href="mailto:contact@sb-nettoyage.fr" className="hover:text-green-200 transition-colors">
+                contact@sb-nettoyage.fr
               </a>
-              <div className="flex items-center gap-2">
-                <MapPin size={14} />
-                <span>Paris & Île-de-France</span>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Partie B - Navigation principale */}
-      <nav className="bg-white shadow-md relative">
-        <div className="container mx-auto px-4">
-          <div className="flex justify-between items-center h-16">
+      {/* Header principal */}
+      <header className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            
             {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <h1 className="text-2xl font-bold text-forest-green">
-                SB<span className="text-golden-orange">-</span>Nettoyage
+            <Link 
+              to="/" 
+              className="flex items-center group"
+              aria-label="Retour à l'accueil SB-Nettoyage"
+            >
+              <h1 className="text-2xl lg:text-3xl font-bold text-green-700 group-hover:text-green-800 transition-colors">
+                SB-<span className="text-yellow-600">Nettoyage</span>
               </h1>
             </Link>
 
-            {/* Navigation Desktop */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link to="/" className="text-gray-700 hover:text-forest-green font-medium transition-base">
-                Accueil
-              </Link>
-              <Link to="/services" className="text-gray-700 hover:text-forest-green font-medium transition-base">
-                Services
-              </Link>
-              <Link to="/contact" className="text-gray-700 hover:text-forest-green font-medium transition-base">
-                Contact
-              </Link>
+            {/* Navigation principale - Desktop */}
+            <nav className="hidden md:flex items-center space-x-8" role="navigation">
+              <NavLink 
+                translationKey="navigation.home" 
+                to="/" 
+                exact={true}
+              />
+              <NavLink 
+                translationKey="navigation.services" 
+                to="/services" 
+              />
+              <NavLink 
+                translationKey="navigation.contact" 
+                to="/contact" 
+              />
+            </nav>
+
+            {/* Actions à droite */}
+            <div className="flex items-center space-x-4">
               
-              {isAuthenticated ? (
-                <div className="relative">
+              {/* Bouton Réserver - Desktop */}
+              <div className="hidden sm:block">
+                <CTAButton 
+                  to="/reservation"
+                  translationKey="navigation.booking"
+                  icon={Phone}
+                  variant="primary"
+                />
+              </div>
+
+              {/* Menu utilisateur */}
+              {user ? (
+                <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 text-gray-700 hover:text-forest-green font-medium transition-base"
+                    className="flex items-center text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg p-2"
+                    aria-expanded={isUserMenuOpen}
+                    aria-haspopup="true"
                   >
-                    <User size={20} />
-                    <span>{user?.name || user?.email}</span>
+                    <User className="w-5 h-5 mr-1" />
+                    <span className="hidden lg:inline font-medium">{user.name}</span>
                   </button>
                   
                   {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                      <Link
-                        to={user?.role === 'admin' ? '/admin/dashboard' : '/tableau-de-bord'}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100"
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-1 z-50">
+                      <NavLink
+                        translationKey="navigation.dashboard"
+                        to="/tableau-de-bord"
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-none"
                         onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        <LayoutDashboard size={16} />
-                        Tableau de bord
-                      </Link>
+                      />
                       <button
                         onClick={() => {
                           logout();
                           setIsUserMenuOpen(false);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 text-left"
                       >
-                        <LogOut size={16} />
-                        Déconnexion
+                        <LogOut className="w-4 h-4 mr-2" />
+                        {t('navigation.logout')}
                       </button>
                     </div>
                   )}
                 </div>
               ) : (
-                <Link 
+                <NavLink
+                  translationKey="navigation.login"
                   to="/connexion"
-                  className="flex items-center gap-2 text-gray-700 hover:text-forest-green font-medium transition-base"
-                >
-                  <User size={20} />
-                  <span>Connexion</span>
-                </Link>
+                  className="hidden sm:inline-flex text-gray-700 hover:text-green-700 font-medium transition-colors"
+                />
               )}
-              
-              <Link 
-                to="/reservation"
-                className="bg-golden-orange text-white px-6 py-2 rounded-md font-semibold hover:bg-golden-orange-dark transition-base"
-              >
-                Réserver
-              </Link>
-            </div>
 
-            {/* Bouton Menu Mobile */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-gray-700 hover:text-forest-green"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+              {/* Bouton menu mobile */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden text-gray-700 hover:text-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg p-2"
+                aria-expanded={isMobileMenuOpen}
+                aria-label="Menu de navigation"
+              >
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Navigation Mobile */}
-        {isMenuOpen && (
-          <div className="md:hidden absolute top-16 left-0 w-full bg-white shadow-lg z-50">
-            <div className="flex flex-col p-4 gap-4">
-              <Link 
-                to="/" 
-                className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Accueil
-              </Link>
-              <Link 
-                to="/services" 
-                className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link 
-                to="/contact" 
-                className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              
-              {isAuthenticated ? (
-                <>
-                  <Link 
-                    to={user?.role === 'admin' ? '/admin/dashboard' : '/tableau-de-bord'}
-                    className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base flex items-center gap-2"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <LayoutDashboard size={20} />
-                    Tableau de bord
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base flex items-center gap-2 text-left"
-                  >
-                    <LogOut size={20} />
-                    Déconnexion
-                  </button>
-                </>
-              ) : (
-                <Link 
-                  to="/connexion" 
-                  className="text-gray-700 hover:text-forest-green font-medium py-2 transition-base flex items-center gap-2"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <User size={20} />
-                  Connexion
-                </Link>
-              )}
-              
-              <Link 
-                to="/reservation"
-                className="bg-golden-orange text-white px-6 py-3 rounded-md font-semibold text-center hover:bg-golden-orange-dark transition-base"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Réserver
-              </Link>
+        {/* Menu mobile */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-200 shadow-lg">
+            {/* Contact mobile (affiché uniquement sur mobile) */}
+            <div className="lg:hidden bg-gray-50 px-4 py-3 border-b border-gray-200">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center text-gray-600">
+                  <Phone className="w-4 h-4 mr-2 text-green-700" />
+                  <a href="tel:+33123456789" className="hover:text-green-700 transition-colors">
+                    +33 1 23 45 67 89
+                  </a>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <Mail className="w-4 h-4 mr-2 text-green-700" />
+                  <a href="mailto:contact@sb-nettoyage.fr" className="hover:text-green-700 transition-colors">
+                    contact@sb-nettoyage.fr
+                  </a>
+                </div>
+                <div className="flex items-center text-gray-600">
+                  <MapPin className="w-4 h-4 mr-2 text-green-700" />
+                  <span>Île-de-France - Service 24h/24</span>
+                </div>
+              </div>
             </div>
+
+            <nav className="px-4 py-4 space-y-3" role="navigation">
+              <NavLink
+                translationKey="navigation.home"
+                to="/"
+                exact={true}
+                className="block py-2 text-gray-700 hover:text-green-700 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              <NavLink
+                translationKey="navigation.services"
+                to="/services"
+                className="block py-2 text-gray-700 hover:text-green-700 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              <NavLink
+                translationKey="navigation.contact"
+                to="/contact"
+                className="block py-2 text-gray-700 hover:text-green-700 font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              
+              {/* Séparateur */}
+              <hr className="my-4 border-gray-200" />
+              
+              {/* Actions mobiles */}
+              <div className="space-y-3">
+                <CTAButton 
+                  to="/reservation"
+                  translationKey="navigation.booking"
+                  icon={Phone}
+                  className="w-full"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
+                
+                {!user && (
+                  <NavLink
+                    translationKey="navigation.login"
+                    to="/connexion"
+                    className="block py-2 text-center text-gray-700 hover:text-green-700 font-medium border border-gray-300 rounded-lg"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                )}
+              </div>
+            </nav>
           </div>
         )}
-      </nav>
-    </header>
+      </header>
+    </>
   );
 }
