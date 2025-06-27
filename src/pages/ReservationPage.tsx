@@ -1,213 +1,393 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, MapPin, Home, Briefcase, Building, Sparkles, Euro } from 'lucide-react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { CheckCircle, Clock, Users, Award, Phone, Mail, Star, Euro, ArrowRight, Home, Building, Factory, Wrench, Calendar, Calculator } from 'lucide-react';
+import BeforeAfterSection from '../components/BeforeAfterSection'; // ← AJOUT
 
-const services = [
-  { id: 'bureaux', name: 'Nettoyage de bureaux', icon: Briefcase, price: 50 },
-  { id: 'commerce', name: 'Nettoyage de commerce', icon: Building, price: 60 },
-  { id: 'residence', name: 'Nettoyage résidentiel', icon: Home, price: 40 },
-  { id: 'vitres', name: 'Nettoyage de vitres', icon: Sparkles, price: 35 },
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  features: string[];
+  priceRange: string;
+  duration: string;
+  image: string;
+  beforeAfter: {
+    before: string;
+    after: string;
+  };
+  icon: React.ComponentType<any>;
+  color: string;
+  gradient: string;
+}
+
+const services: Service[] = [
+  {
+    id: 'residential',
+    title: 'Nettoyage Résidentiel',
+    description: 'Service de ménage professionnel pour votre domicile. Nos équipes qualifiées s\'occupent de l\'entretien complet de votre logement avec des produits écologiques et du matériel professionnel.',
+    features: [
+      'Ménage complet toutes pièces',
+      'Nettoyage des sanitaires',
+      'Dépoussiérage et aspirateur',
+      'Lavage des sols',
+      'Nettoyage des vitres intérieures',
+      'Produits écologiques inclus'
+    ],
+    priceRange: '25€ - 45€/h',
+    duration: '2-4 heures',
+    image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    beforeAfter: {
+      before: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      after: 'https://images.unsplash.com/photo-1556912173-3bb406ef7e77?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    },
+    icon: Home,
+    color: '#1b5b35',
+    gradient: 'from-green-600 to-green-700'
+  },
+  {
+    id: 'commercial',
+    title: 'Nettoyage Commercial',
+    description: 'Solutions professionnelles pour bureaux, magasins et espaces commerciaux. Intervention flexible selon vos horaires d\'ouverture avec du personnel formé aux exigences du secteur tertiaire.',
+    features: [
+      'Nettoyage bureaux et open-spaces',
+      'Entretien des sanitaires professionnels',
+      'Nettoyage des espaces communs',
+      'Vidage et désinfection des poubelles',
+      'Nettoyage des vitres et baies vitrées',
+      'Intervention hors horaires d\'ouverture'
+    ],
+    priceRange: '20€ - 35€/h',
+    duration: '3-6 heures',
+    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    beforeAfter: {
+      before: 'https://images.unsplash.com/photo-1541746972996-4e0b0f93e586?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      after: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    },
+    icon: Building,
+    color: '#c88f3b',
+    gradient: 'from-yellow-600 to-orange-600'
+  },
+  {
+    id: 'industrial',
+    title: 'Nettoyage Industriel',
+    description: 'Nettoyage spécialisé pour sites industriels, entrepôts et grandes surfaces. Équipes formées aux normes de sécurité avec matériel adapté aux environnements exigeants.',
+    features: [
+      'Nettoyage d\'entrepôts et usines',
+      'Dégraissage des sols industriels',
+      'Nettoyage haute pression',
+      'Évacuation des déchets industriels',
+      'Respect des normes de sécurité',
+      'Intervention week-end et jours fériés'
+    ],
+    priceRange: '30€ - 50€/h',
+    duration: '4-8 heures',
+    image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    beforeAfter: {
+      before: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      after: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    },
+    icon: Factory,
+    color: '#1a0d1a',
+    gradient: 'from-gray-800 to-gray-900'
+  },
+  {
+    id: 'specialized',
+    title: 'Services Spécialisés',
+    description: 'Interventions spécifiques pour nettoyage après travaux, désinfection, remise en état. Solutions sur-mesure pour situations particulières avec équipement spécialisé.',
+    features: [
+      'Nettoyage après travaux/rénovation',
+      'Désinfection et décontamination',
+      'Nettoyage de fin de chantier',
+      'Remise en état post-sinistre',
+      'Nettoyage de vitres en hauteur',
+      'Interventions d\'urgence 24h/24'
+    ],
+    priceRange: '40€ - 80€/h',
+    duration: '2-6 heures',
+    image: 'https://images.unsplash.com/photo-1527515862127-a4fc05baf7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    beforeAfter: {
+      before: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80',
+      after: 'https://images.unsplash.com/photo-1527515862127-a4fc05baf7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80'
+    },
+    icon: Wrench,
+    color: '#1b5b35',
+    gradient: 'from-green-600 to-yellow-600'
+  }
 ];
 
-const timeSlots = ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00', '17:00'];
-
-export default function ReservationPage() {
-  const navigate = useNavigate();
-  
-  const [selectedService, setSelectedService] = useState('');
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  const [duration, setDuration] = useState(2);
-  const [address, setAddress] = useState('');
-  
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 2);
-  const minDateStr = minDate.toISOString().split('T')[0];
-  
-  const calculatePrice = () => {
-    if (!selectedService) return 0;
-    const service = services.find(s => s.id === selectedService);
-    return service ? service.price * duration : 0;
-  };
-  
-  const totalPrice = calculatePrice() * 1.20; // Avec TVA 20%
-  
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedService || !selectedDate || !selectedTime || !address) {
-      alert('Veuillez remplir tous les champs');
-      return;
-    }
-    
-    // Stocker la réservation
-    const reservation = {
-      service: services.find(s => s.id === selectedService)?.name,
-      date: selectedDate,
-      time: selectedTime,
-      duration,
-      address,
-      price: totalPrice,
-      status: 'confirmée'
-    };
-    
-    localStorage.setItem('lastReservation', JSON.stringify(reservation));
-    navigate('/tableau-de-bord', { state: { message: 'Votre réservation a été confirmée !' } });
-  };
+export default function ServicesPage() {
+  const { t } = useTranslation();
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [showQuoteForm, setShowQuoteForm] = useState(false);
 
   return (
-    <div className="min-h-screen bg-off-white py-16">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <h1 className="text-4xl font-bold text-forest-green text-center mb-12">
-          Réservation de service
-        </h1>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="relative py-16 overflow-hidden" style={{background: `linear-gradient(135deg, #1b5b35, #2d7a4a)`}}>
+        <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            Nos Services de Nettoyage
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-green-100 max-w-3xl mx-auto">
+            Solutions professionnelles adaptées à tous vos besoins. Devis gratuit et intervention rapide en Île-de-France.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => setShowQuoteForm(true)}
+              className="inline-flex items-center px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105"
+              style={{backgroundColor: '#c88f3b', color: '#1b5b35'}}
+            >
+              <Calculator className="w-5 h-5 mr-2" />
+              Devis Gratuit
+            </button>
+            <a
+              href="tel:+33123456789"
+              className="border-2 border-white hover:bg-white hover:text-green-700 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center"
+            >
+              <Phone className="w-5 h-5 mr-2" />
+              +33 1 23 45 67 89
+            </a>
+          </div>
+        </div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-8">
-          {/* Sélection du service */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Type de service
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {services.map((service) => {
-                const Icon = service.icon;
-                return (
-                  <label
-                    key={service.id}
-                    className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                      selectedService === service.id 
-                        ? 'border-forest-green bg-forest-green/5' 
-                        : 'border-gray-200 hover:border-forest-green/50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="service"
-                      value={service.id}
-                      checked={selectedService === service.id}
-                      onChange={(e) => setSelectedService(e.target.value)}
-                      className="sr-only"
-                    />
-                    <Icon className="mr-3 text-forest-green" size={20} />
-                    <div className="flex-1">
-                      <p className="font-medium">{service.name}</p>
-                      <p className="text-sm text-gray-600">{service.price}€/heure</p>
+      {/* Services Grid */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8">
+            {services.map((service) => {
+              const IconComponent = service.icon;
+              return (
+                <div key={service.id} className="group">
+                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+                    {/* Image */}
+                    <div className="relative h-64 overflow-hidden">
+                      <img
+                        src={service.image}
+                        alt={service.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <div 
+                          className="w-12 h-12 rounded-full flex items-center justify-center"
+                          style={{backgroundColor: service.color}}
+                        >
+                          <IconComponent className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                      <div className="absolute top-4 right-4 bg-white rounded-full px-3 py-1">
+                        <span className="text-sm font-semibold" style={{color: service.color}}>
+                          {service.priceRange}
+                        </span>
+                      </div>
                     </div>
-                  </label>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Date et heure */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                <Calendar className="inline mr-2 text-forest-green" size={20} />
-                Date du service
-              </label>
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                min={minDateStr}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-forest-green"
-                required
-              />
-            </div>
+                    {/* Content */}
+                    <div className="p-6">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-3">{service.title}</h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed">{service.description}</p>
+                      
+                      {/* Features */}
+                      <div className="space-y-2 mb-6">
+                        {service.features.slice(0, 3).map((feature, index) => (
+                          <div key={index} className="flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-2" style={{color: service.color}} />
+                            <span className="text-sm text-gray-700">{feature}</span>
+                          </div>
+                        ))}
+                        {service.features.length > 3 && (
+                          <button
+                            onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
+                            className="text-sm font-medium hover:underline"
+                            style={{color: service.color}}
+                          >
+                            {selectedService === service.id ? 'Voir moins' : `+${service.features.length - 3} autres`}
+                          </button>
+                        )}
+                      </div>
 
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">
-                <Clock className="inline mr-2 text-forest-green" size={20} />
-                Créneau horaire
-              </label>
-              <select
-                value={selectedTime}
-                onChange={(e) => setSelectedTime(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-forest-green"
-                required
-              >
-                <option value="">Sélectionner un créneau</option>
-                {timeSlots.map((time) => (
-                  <option key={time} value={time}>{time}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+                      {/* Expanded features */}
+                      {selectedService === service.id && (
+                        <div className="space-y-2 mb-6 border-t pt-4">
+                          {service.features.slice(3).map((feature, index) => (
+                            <div key={index} className="flex items-center">
+                              <CheckCircle className="w-4 h-4 mr-2" style={{color: service.color}} />
+                              <span className="text-sm text-gray-700">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
-          {/* Durée */}
-          <div className="mb-8">
-            <label className="block text-gray-700 font-medium mb-2">
-              Durée estimée (heures)
-            </label>
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              min="1"
-              max="8"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-forest-green"
-              required
-            />
-          </div>
+                      {/* Info */}
+                      <div className="flex items-center justify-between mb-6 text-sm text-gray-600">
+                        <div className="flex items-center">
+                          <Clock className="w-4 h-4 mr-1" />
+                          <span>{service.duration}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Star className="w-4 h-4 mr-1 text-yellow-500" />
+                          <span>4.9/5 (50+ avis)</span>
+                        </div>
+                      </div>
 
-          {/* Adresse */}
-          <div className="mb-8">
-            <label className="block text-gray-700 font-medium mb-2">
-              <MapPin className="inline mr-2 text-forest-green" size={20} />
-              Adresse d'intervention
-            </label>
-            <input
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="123 rue de la Paix, 75001 Paris"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-forest-green"
-              required
-            />
-          </div>
-
-          {/* Récapitulatif du prix */}
-          {selectedService && (
-            <div className="bg-gray-50 p-6 rounded-lg mb-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <Euro className="mr-2 text-forest-green" size={20} />
-                Devis estimatif
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-gray-700">
-                  <span>Total HT</span>
-                  <span>{calculatePrice().toFixed(2)}€</span>
+                      {/* CTA */}
+                      <button
+                        onClick={() => setShowQuoteForm(true)}
+                        className="w-full py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+                        style={{backgroundColor: service.color, color: 'white'}}
+                      >
+                        Demander un devis
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>TVA (20%)</span>
-                  <span>{(calculatePrice() * 0.20).toFixed(2)}€</span>
-                </div>
-                <div className="flex justify-between text-lg font-semibold text-forest-green pt-2 border-t">
-                  <span>Total TTC</span>
-                  <span>{totalPrice.toFixed(2)}€</span>
-                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* NOUVELLE SECTION AVANT/APRÈS AVEC SLIDER */}
+      <BeforeAfterSection />
+
+      {/* CTA Section */}
+      <section className="py-16" style={{background: `linear-gradient(135deg, #1b5b35, #c88f3b)`}}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Prêt à transformer vos espaces ?
+          </h2>
+          <p className="text-xl mb-8 text-green-100">
+            Obtenez un devis personnalisé en moins de 24h. Intervention rapide en Île-de-France.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button
+              onClick={() => setShowQuoteForm(true)}
+              className="bg-white hover:bg-gray-100 text-green-700 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center transform hover:scale-105"
+            >
+              <Calculator className="w-5 h-5 mr-2" />
+              Calculer mon devis
+            </button>
+            <a
+              href="/contact"
+              className="border-2 border-white hover:bg-white hover:text-green-700 px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center"
+            >
+              <Mail className="w-5 h-5 mr-2" />
+              Nous contacter
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Quote Form Modal */}
+      {showQuoteForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Demande de Devis</h3>
+                <button
+                  onClick={() => setShowQuoteForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
               </div>
+              
+              <form className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Type de service *
+                  </label>
+                  <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <option value="">Sélectionnez un service</option>
+                    {services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nom *
+                    </label>
+                    <input
+                      type="text"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Votre nom"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Téléphone *
+                    </label>
+                    <input
+                      type="tel"
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="06 12 34 56 78"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="votre@email.com"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Surface (m²)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="100"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date souhaitée
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Message
+                  </label>
+                  <textarea
+                    rows={3}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="Décrivez vos besoins..."
+                  ></textarea>
+                </div>
+                
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105"
+                  style={{backgroundColor: '#1b5b35'}}
+                >
+                  Envoyer ma demande
+                </button>
+              </form>
             </div>
-          )}
-
-          {/* Boutons */}
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              className="flex-1 bg-golden-orange text-white py-3 rounded-md font-semibold hover:bg-golden-orange-dark transition-base"
-            >
-              Confirmer la réservation
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="px-6 py-3 border border-gray-300 rounded-md font-medium hover:bg-gray-50 transition-base"
-            >
-              Annuler
-            </button>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }
